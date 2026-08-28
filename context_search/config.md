@@ -60,7 +60,7 @@ A list of providers. Each entry has:
 | Value             | Result                                                     |
 | ----------------- | ---------------------------------------------------------- |
 | `youtube`         | YouTube logo                                               |
-| `google`          | Google-coloured magnifying glass                           |
+| `google`          | Google's four-colour G                                     |
 | `google-images`   | Google Images picture icon                                 |
 | `search`          | plain magnifying glass                                     |
 | `text:W`, `text:📖` | badge with that letter or emoji (1-2 characters)          |

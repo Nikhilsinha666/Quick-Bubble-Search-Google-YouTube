@@ -17,23 +17,26 @@
 
   var STYLE = [
     ":host { all: initial; position: absolute; z-index: 2147483000; }",
+    // `color` matters: icons drawn with currentColor and the letter badges
+    // follow it, so they stay visible in both themes
     ".bubble { display: flex; align-items: center; gap: 2px; padding: 3px;",
     "  border-radius: 12px; background: #fff; border: 1px solid rgba(0,0,0,.14);",
-    "  box-shadow: 0 6px 18px rgba(0,0,0,.22); }",
+    "  box-shadow: 0 6px 18px rgba(0,0,0,.22); color: #444; }",
     ".bubble.dark { background: #2f2f31; border-color: rgba(255,255,255,.16);",
-    "  box-shadow: 0 6px 18px rgba(0,0,0,.55); }",
+    "  box-shadow: 0 6px 18px rgba(0,0,0,.55); color: #e6e6e6; }",
+    // color: inherit matters - a button's UA colour is not inherited, and
+    // icons drawn with currentColor would stay black in dark mode
     "button { display: flex; align-items: center; justify-content: center;",
     "  padding: 0; margin: 0; border: 0; border-radius: 9px; background: transparent;",
-    "  cursor: pointer; -webkit-appearance: none; appearance: none; }",
+    "  color: inherit; cursor: pointer; -webkit-appearance: none; appearance: none; }",
     "button:hover { background: rgba(0,0,0,.09); }",
     ".dark button:hover { background: rgba(255,255,255,.15); }",
     "button:focus-visible { outline: 2px solid #4285f4; outline-offset: 1px; }",
     "svg { display: block; pointer-events: none; width: 68%; height: 68%; }",
     "img { display: block; pointer-events: none; width: 78%; height: 78%;",
     "  object-fit: contain; border-radius: 4px; }",
-    ".letter { font-family: system-ui, sans-serif; font-weight: 600; color: #444;",
-    "  line-height: 1; pointer-events: none; }",
-    ".dark .letter { color: #e0e0e0; }",
+    ".letter { font-family: system-ui, sans-serif; font-weight: 600;",
+    "  color: inherit; line-height: 1; pointer-events: none; }",
   ].join("\n");
 
   var ICONS = {
@@ -48,16 +51,20 @@
       '<path fill="#34a853" d="M3.6 17.6l4.9-5.5 3.2 3.6 2.7-3 5.4 4.9z"/>' +
       '<path fill="#ea4335" d="M11.7 15.7l2.7-3 5.4 4.9h-5.5z"/>' +
       '<rect x="2" y="4.5" width="20" height="15" rx="2.5" fill="none" stroke="#4285f4" stroke-width="1.7"/></svg>',
-    // magnifying glass with the four Google colours, one per quarter of the ring
+    /* Google's four-colour "G", drawn as one arc per colour plus the bar.
+     * The ring is a circle of r=9.25 (circumference 58.12) with a gap in the
+     * upper right, so each dasharray is <arc length> <rest of the circle>.
+     * "Google" and the G mark are trademarks of Google LLC; used here only to
+     * label the Google search action. */
     google:
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-      '<g fill="none" stroke-width="2.7" stroke-dasharray="9.74 29.22">' +
-      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#4285f4" transform="rotate(-90 10.5 10.5)"/>' +
-      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#ea4335"/>' +
-      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#fbbc05" transform="rotate(90 10.5 10.5)"/>' +
-      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#34a853" transform="rotate(180 10.5 10.5)"/>' +
-      "</g>" +
-      '<path stroke="#4285f4" stroke-width="2.7" stroke-linecap="round" d="M15.5 15.5 20 20"/></svg>',
+      '<g fill="none" stroke-width="4.5">' +
+      '<circle cx="12" cy="12" r="9.25" stroke="#4285f4" stroke-dasharray="9.69 48.43"/>' +
+      '<circle cx="12" cy="12" r="9.25" stroke="#34a853" stroke-dasharray="14.53 43.59" transform="rotate(60 12 12)"/>' +
+      '<circle cx="12" cy="12" r="9.25" stroke="#fbbc05" stroke-dasharray="16.14 41.98" transform="rotate(150 12 12)"/>' +
+      '<circle cx="12" cy="12" r="9.25" stroke="#ea4335" stroke-dasharray="11.3 46.82" transform="rotate(250 12 12)"/>' +
+      '<path stroke="#4285f4" d="M12 14.25H22.6"/>' +
+      "</g></svg>",
     search:
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       '<circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" stroke-width="2"/>' +
@@ -85,11 +92,36 @@
     return Object.prototype.toString.call(list) === "[object Array]" ? list : [];
   }
 
+  /* Anki marks dark mode with a "night" class on the body or the html element.
+   * If that is missing, judge by how dark the page actually paints, which also
+   * respects a note type that styles its own background. */
   function isDark() {
-    var cls = (document.body ? document.body.className : "") + " " + document.documentElement.className;
+    var cls =
+      (document.body ? document.body.className : "") +
+      " " +
+      document.documentElement.className;
     if (/night/i.test(String(cls))) {
       return true;
     }
+
+    var elements = [document.body, document.documentElement];
+    for (var i = 0; i < elements.length; i++) {
+      if (!elements[i]) {
+        continue;
+      }
+      try {
+        var background = window.getComputedStyle(elements[i]).backgroundColor;
+        var parts = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(background);
+        if (parts && (parts[4] === undefined || parseFloat(parts[4]) > 0.2)) {
+          var luminance =
+            0.299 * Number(parts[1]) + 0.587 * Number(parts[2]) + 0.114 * Number(parts[3]);
+          return luminance < 128;
+        }
+      } catch (err) {
+        /* keep looking */
+      }
+    }
+
     try {
       return window.matchMedia("(prefers-color-scheme: dark)").matches;
     } catch (err) {

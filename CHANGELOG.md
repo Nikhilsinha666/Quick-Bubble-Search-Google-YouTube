@@ -10,8 +10,8 @@
   ticked, reordered and removed from the list.
 - Icons can be a built-in logo, a letter or emoji badge, or your own image file.
   Images are copied into `user_files/icons/`, which survives add-on updates.
-- Google web search is now on by default, with a Google-coloured magnifier
-  icon, next to YouTube and Google Images.
+- Google web search is now on by default, with Google's four-colour G icon,
+  next to YouTube and Google Images.
 - Saving the settings updates the icons on the card straight away - no need to
   leave and re-enter the review screen.
 
