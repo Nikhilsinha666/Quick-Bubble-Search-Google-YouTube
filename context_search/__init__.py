@@ -465,6 +465,15 @@ def on_webview_will_set_content(web_content: Any, context: Any) -> None:
 def on_js_message(
     handled: tuple[bool, Any], message: str, context: Any
 ) -> tuple[bool, Any]:
+    # Someone already dealt with this message. That happens when the add-on is
+    # installed twice (say a copied folder next to the AnkiWeb install) - without
+    # this check one icon click would open two browser tabs.
+    try:
+        if handled[0]:
+            return handled
+    except (TypeError, IndexError):
+        pass
+
     if not isinstance(message, str) or not message.startswith(_JS_PREFIX):
         return handled
 

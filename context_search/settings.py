@@ -579,8 +579,18 @@ def add_tools_menu_action() -> None:
     global _menu_action
     if mw is None or _menu_action is not None:
         return
+    label = f"{ADDON_NAME}..."
     try:
-        action = QAction(f"{ADDON_NAME}...", mw)
+        # a second copy of the add-on (e.g. a copied folder next to the AnkiWeb
+        # install) must not add a second Tools entry
+        for existing in mw.form.menuTools.actions():
+            if existing.text() == label:
+                _menu_action = existing
+                return
+    except Exception:
+        pass
+    try:
+        action = QAction(label, mw)
         qconnect(action.triggered, lambda *_: open_settings())
         mw.form.menuTools.addAction(action)
         _menu_action = action
