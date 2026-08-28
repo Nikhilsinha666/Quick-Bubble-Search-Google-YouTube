@@ -1,0 +1,9 @@
+{
+  "package": "context_search",
+  "name": "Context Search (YouTube & Google Images)",
+  "human_version": "1.0.0",
+  "homepage": "https://github.com/Nikhilsinha666/anki-context-search",
+  "min_point_version": 45,
+  "conflicts": [],
+  "mod": 0
+}

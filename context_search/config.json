@@ -1,0 +1,45 @@
+{
+  "use_submenu": true,
+  "submenu_label": "Context search",
+  "enable_in_reviewer": true,
+  "enable_in_editor": true,
+  "enable_in_more_menu": true,
+  "show_selection_in_label": true,
+  "max_label_length": 32,
+  "max_query_chars": 200,
+  "strip_cloze_markers": true,
+  "strip_sound_tags": true,
+  "strip_surrounding_punctuation": true,
+  "searches": [
+    {
+      "name": "YouTube",
+      "url": "https://www.youtube.com/results?search_query={query}",
+      "enabled": true
+    },
+    {
+      "name": "Google Images",
+      "url": "https://www.google.com/search?tbm=isch&q={query}",
+      "enabled": true
+    },
+    {
+      "name": "Google",
+      "url": "https://www.google.com/search?q={query}",
+      "enabled": false
+    },
+    {
+      "name": "Google Definition",
+      "url": "https://www.google.com/search?q=define+{query}",
+      "enabled": false
+    },
+    {
+      "name": "Forvo (pronunciation)",
+      "url": "https://forvo.com/word/{query_path}/",
+      "enabled": false
+    },
+    {
+      "name": "YouGlish (word in real videos)",
+      "url": "https://youglish.com/pronounce/{query_path}/english",
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+"""Context Search - Anki add-on.
+
+Select any text on a card while reviewing (or inside the note editor),
+right-click it, and search that text on YouTube or Google Images.
+Extra search providers can be added from the add-on configuration.
+
+Hooks used:
+    gui_hooks.webview_will_show_context_menu   -> reviewer / previewer / card layout
+    gui_hooks.editor_will_show_context_menu    -> Add + Browse note editor
+    gui_hooks.reviewer_will_show_context_menu  -> reviewer "More" menu ("m" key)
+"""
+
+from __future__ import annotations
+
+import copy
+import re
+from typing import Any, Callable
+
+from urllib.parse import quote, quote_plus
+
+from aqt import gui_hooks, mw
+from aqt.qt import QMenu
+
+try:
+    from aqt.qt import qconnect
+except ImportError:  # pragma: no cover - very old Anki builds
+
+    def qconnect(signal: Any, func: Callable) -> None:  # type: ignore[misc]
+        signal.connect(func)
+
+
+try:
+    from aqt.utils import openLink, tooltip
+except ImportError:  # pragma: no cover - very old Anki builds
+    import webbrowser
+
+    def openLink(url: str) -> None:  # type: ignore[misc]
+        webbrowser.open(url)
+
+    def tooltip(msg: str, period: int = 3000) -> None:  # type: ignore[misc]
+        print(msg)
+
+
+# ---------------------------------------------------------------------------
+# defaults (kept in sync with config.json, used as a fallback + validator)
+# ---------------------------------------------------------------------------
+
+DEFAULT_CONFIG: dict[str, Any] = {
+    "use_submenu": True,
+    "submenu_label": "Context search",
+    "enable_in_reviewer": True,
+    "enable_in_editor": True,
+    "enable_in_more_menu": True,
+    "show_selection_in_label": True,
+    "max_label_length": 32,
+    "max_query_chars": 200,
+    "strip_cloze_markers": True,
+    "strip_sound_tags": True,
+    "strip_surrounding_punctuation": True,
+    "searches": [
+        {
+            "name": "YouTube",
+            "url": "https://www.youtube.com/results?search_query={query}",
+            "enabled": True,
+        },
+        {
+            "name": "Google Images",
+            "url": "https://www.google.com/search?tbm=isch&q={query}",
+            "enabled": True,
+        },
+        {
+            "name": "Google",
+            "url": "https://www.google.com/search?q={query}",
+            "enabled": False,
+        },
+        {
+            "name": "Google Definition",
+            "url": "https://www.google.com/search?q=define+{query}",
+            "enabled": False,
+        },
+        {
+            "name": "Forvo (pronunciation)",
+            "url": "https://forvo.com/word/{query_path}/",
+            "enabled": False,
+        },
+        {
+            "name": "YouGlish (word in real videos)",
+            "url": "https://youglish.com/pronounce/{query_path}/english",
+            "enabled": False,
+        },
+    ],
+}
+
+_CLOZE_RE = re.compile(r"\{\{c\d+::(.*?)(?:::.*?)?\}\}", re.DOTALL)
+_SOUND_RE = re.compile(r"\[sound:[^\]]*\]")
+_WHITESPACE_RE = re.compile(r"\s+")
+_TRIM_CHARS = " \t\r\n\"'`*_~^\u2026,;:.!?\u00bf\u00a1()[]{}<>\u00ab\u00bb\u201e\u201c\u201d\u2018\u2019-\u2013\u2014/\\|"
+
+# marker so the same QMenu never gets our items twice
+_MENU_MARK = "_context_search_added"
+
+
+# ---------------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------------
+
+
+def _as_int(value: Any, fallback: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def get_config() -> dict[str, Any]:
+    """Return the user config merged onto the defaults, fully validated."""
+    cfg = copy.deepcopy(DEFAULT_CONFIG)
+
+    user: Any = None
+    if mw is not None:
+        try:
+            user = mw.addonManager.getConfig(__name__)
+        except Exception:
+            user = None
+
+    if isinstance(user, dict):
+        for key, value in user.items():
+            if key in cfg:
+                cfg[key] = value
+
+    searches: list[dict[str, str]] = []
+    raw_searches = cfg.get("searches")
+    if isinstance(raw_searches, list):
+        for raw in raw_searches:
+            if not isinstance(raw, dict):
+                continue
+            if not raw.get("enabled", True):
+                continue
+            url = str(raw.get("url") or "").strip()
+            if not url:
+                continue
+            name = str(raw.get("name") or "").strip() or "Search"
+            searches.append({"name": name, "url": url})
+    cfg["searches"] = searches
+
+    return cfg
+
+
+def clean_selection(text: str, cfg: dict[str, Any]) -> str:
+    """Turn a raw webview selection into a usable search query."""
+    if not text:
+        return ""
+
+    text = text.replace("\u00a0", " ").replace("\u200b", "")
+
+    if cfg.get("strip_cloze_markers", True):
+        text = _CLOZE_RE.sub(r"\1", text)
+    if cfg.get("strip_sound_tags", True):
+        text = _SOUND_RE.sub(" ", text)
+
+    text = _WHITESPACE_RE.sub(" ", text).strip()
+
+    if cfg.get("strip_surrounding_punctuation", True):
+        text = text.strip(_TRIM_CHARS)
+
+    limit = _as_int(cfg.get("max_query_chars"), 200)
+    if limit > 0 and len(text) > limit:
+        text = text[:limit].rstrip()
+
+    return text
+
+
+def selected_text(webview: Any) -> str:
+    """Read the current selection from an AnkiWebView (or its page)."""
+    candidates: list[Any] = [webview]
+    try:
+        page = webview.page()
+        if page is not None:
+            candidates.append(page)
+    except Exception:
+        pass
+
+    for obj in candidates:
+        try:
+            text = obj.selectedText()
+        except Exception:
+            continue
+        if text:
+            return str(text)
+    return ""
+
+
+def build_url(template: str, query: str) -> str:
+    """Fill a URL template with the query.
+
+    Supported placeholders:
+        {query}      / {}   url-encoded for a query string (spaces -> '+')
+        {query_path}        percent-encoded for a path segment (spaces -> %20)
+        {query_raw}         inserted as-is, no encoding
+
+    A template without any placeholder simply gets the encoded query appended.
+    """
+    plus = quote_plus(query)
+    if "{query" in template or "{}" in template:
+        return (
+            template.replace("{query_raw}", query)
+            .replace("{query_path}", quote(query, safe=""))
+            .replace("{query_plus}", plus)
+            .replace("{query}", plus)
+            .replace("{}", plus)
+        )
+    return template + plus
+
+
+def run_search(name: str, template: str, query: str) -> None:
+    url = build_url(template, query)
+    try:
+        openLink(url)
+    except Exception as exc:  # pragma: no cover - depends on desktop env
+        tooltip(f"Context Search: could not open {name} ({exc})")
+
+
+def _escape_amp(text: str) -> str:
+    """'&' in a Qt menu label means 'mnemonic', so double it up."""
+    return text.replace("&", "&&")
+
+
+def _action_label(name: str, query: str, cfg: dict[str, Any]) -> str:
+    if not cfg.get("show_selection_in_label", True):
+        return name
+
+    limit = _as_int(cfg.get("max_label_length"), 32)
+    preview = query
+    if limit > 0 and len(preview) > limit:
+        preview = preview[: max(1, limit - 1)].rstrip() + "\u2026"
+    return f'{name}: "{preview}"'
+
+
+def _is_editor_webview(webview: Any) -> bool:
+    for cls in type(webview).__mro__:
+        if "EditorWebView" in cls.__name__:
+            return True
+    return False
+
+
+def add_menu_items(menu: QMenu, query: str, cfg: dict[str, Any]) -> None:
+    searches = cfg.get("searches") or []
+    if not searches:
+        return
+
+    target: Any = menu
+    if cfg.get("use_submenu", True):
+        label = str(cfg.get("submenu_label") or "Context search")
+        submenu = menu.addMenu(_escape_amp(label))
+        if submenu is None:
+            return
+        target = submenu
+    elif menu.actions():
+        menu.addSeparator()
+
+    for entry in searches:
+        name = entry["name"]
+        template = entry["url"]
+        action = target.addAction(_escape_amp(_action_label(name, query, cfg)))
+        if action is None:
+            continue
+        qconnect(
+            action.triggered,
+            lambda _checked=False, n=name, t=template, q=query: run_search(n, t, q),
+        )
+
+
+def _decorate_menu(menu: QMenu, webview: Any, config_key: str) -> None:
+    if menu is None or webview is None:
+        return
+
+    cfg = get_config()
+    if not cfg.get(config_key, True):
+        return
+
+    if getattr(menu, _MENU_MARK, False):
+        return
+
+    query = clean_selection(selected_text(webview), cfg)
+    if not query:
+        return
+
+    try:
+        setattr(menu, _MENU_MARK, True)
+    except Exception:
+        pass
+
+    add_menu_items(menu, query, cfg)
+
+
+# ---------------------------------------------------------------------------
+# hook handlers
+# ---------------------------------------------------------------------------
+
+
+def on_webview_will_show_context_menu(webview: Any, menu: QMenu) -> None:
+    key = "enable_in_editor" if _is_editor_webview(webview) else "enable_in_reviewer"
+    _decorate_menu(menu, webview, key)
+
+
+def on_editor_will_show_context_menu(editor_webview: Any, menu: QMenu) -> None:
+    _decorate_menu(menu, editor_webview, "enable_in_editor")
+
+
+def on_reviewer_will_show_context_menu(reviewer: Any, menu: QMenu) -> None:
+    _decorate_menu(menu, getattr(reviewer, "web", None), "enable_in_more_menu")
+
+
+def register_hooks() -> None:
+    handlers = (
+        ("webview_will_show_context_menu", on_webview_will_show_context_menu),
+        ("editor_will_show_context_menu", on_editor_will_show_context_menu),
+        ("reviewer_will_show_context_menu", on_reviewer_will_show_context_menu),
+    )
+    for hook_name, handler in handlers:
+        hook = getattr(gui_hooks, hook_name, None)
+        if hook is None:
+            continue
+        try:
+            hook.append(handler)
+        except Exception:
+            pass
+
+
+register_hooks()

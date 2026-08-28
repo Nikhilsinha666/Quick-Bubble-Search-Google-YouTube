@@ -1,0 +1,17 @@
+# python
+__pycache__/
+*.py[cod]
+
+# build output
+dist/
+build_tmp/
+*.ankiaddon
+
+# per-user add-on state written by Anki
+meta.json
+
+# editors / os
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
