@@ -42,8 +42,15 @@ The form is the same either way:
      both boxes is the form default and means "every version".
    - **File**: `dist\context_search.ankiaddon`
 4. Submit. AnkiWeb gives the add-on a numeric id, and the install code users
-   paste into `Tools > Add-ons > Get Add-ons` is that same id.
-5. Put the id in `README.md` where it says `<ANKIWEB-ID>`.
+   paste into `Tools > Add-ons > Get Add-ons` is that same id. This add-on is
+   **458766448** (<https://ankiweb.net/shared/info/458766448>).
+5. The id is also the folder name under `Anki2/addons21` once installed from
+   AnkiWeb, which is a quick way to look it up again.
+
+Note: AnkiWeb strips characters like `(`, `)` and `&` from the title, so the
+listing shows up as `Context Search YouTube Google Images`, and that stripped
+name is what Anki displays in the add-on list. The name inside the add-on
+(submenu, config screen, tooltips) keeps the full form.
 
 ## 3. Images on the add-on page
 

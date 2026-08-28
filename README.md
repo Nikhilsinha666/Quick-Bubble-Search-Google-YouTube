@@ -18,9 +18,10 @@ way while you study. Either one can be switched off in the config.
 
 ## Install
 
-**From AnkiWeb** (recommended once published)
+**From AnkiWeb** (recommended)
 
-`Tools > Add-ons > Get Add-ons...` and paste the code `<ANKIWEB-ID>`.
+`Tools > Add-ons > Get Add-ons...` and paste the code `458766448`, or open the
+[add-on page](https://ankiweb.net/shared/info/458766448).
 
 **From a release file**
 
