@@ -15,28 +15,27 @@ that actually exist, otherwise the page shows a broken image.
 
 ---
 
-Select a word on a card, right-click it, and search it on **YouTube** or **Google Images** without leaving Anki.
+Click a word on a card and small **YouTube** and **Google Images** icons appear right next to it. One click opens the search in your browser.
 
-Handy when a card needs a picture or a real-world example: select the word, right-click, done.
+Handy when a card needs a picture or a real-world example: click the word, click the icon, done.
 
 <img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/01-context-menu.png">
 
 ### How to use
 
-1. Select any word or phrase on the card you are reviewing.
-2. Right-click the selection.
-3. Pick **Context search > YouTube** or **Context search > Google Images**.
+1. Click any word on the card - it gets selected and the icons appear above it.
+2. Click the YouTube or the Google Images icon.
 
-The search opens in your normal web browser.
+Dragging across a whole phrase works too. `Esc`, scrolling, or clicking somewhere else makes the icons go away.
+
+Prefer the old way? The same searches are also in the **right-click** menu, under **Context search**.
 
 ### Where it works
 
-- while reviewing (question and answer side) and in the card previewer
-- in the note editor, both in the **Add** window and in **Browse**
-- in the reviewer **More** menu (`m` key), when text is selected
+- the floating icons: while reviewing (question and answer side), in the card previewer and in the card layout screen
+- the right-click menu: everywhere above, plus the note editor (**Add** and **Browse**) and the reviewer **More** menu (`m` key)
 
-The entries only show up when something is actually selected, so your usual
-right-click menu stays exactly as it was.
+Nothing shows up until there is actually a selection, so it stays out of your way while you study. Both the icons and the menu can be switched off separately in the config.
 
 ### The selection is cleaned up first
 
@@ -49,12 +48,15 @@ right-click menu stays exactly as it was.
 
 `Tools > Add-ons > Context Search (YouTube & Google Images) > Config`
 
+- `popup_enabled` - turn the floating icons off and keep only the right-click menu
+- `popup_trigger` - `click` shows the icons on a single click, `selection` only when you select text yourself
+- `popup_icon_size` - how big the icons are
 - rename the submenu, or drop the searches straight into the right-click menu
-- turn it off per screen (reviewer / editor / More menu)
+- turn the menu off per screen (reviewer / editor / More menu)
 - add your own search engines with a URL template:
 
 ```json
-{ "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search={query}", "enabled": true }
+{ "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search={query}", "icon": "search", "enabled": true }
 ```
 
 Google web search, Google definitions, Forvo and YouGlish are already written

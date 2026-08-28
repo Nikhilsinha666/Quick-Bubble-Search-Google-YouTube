@@ -1,4 +1,7 @@
 {
+  "popup_enabled": true,
+  "popup_trigger": "click",
+  "popup_icon_size": 30,
   "use_submenu": true,
   "submenu_label": "Context search",
   "enable_in_reviewer": true,
@@ -14,31 +17,37 @@
     {
       "name": "YouTube",
       "url": "https://www.youtube.com/results?search_query={query}",
+      "icon": "youtube",
       "enabled": true
     },
     {
       "name": "Google Images",
       "url": "https://www.google.com/search?tbm=isch&q={query}",
+      "icon": "google-images",
       "enabled": true
     },
     {
       "name": "Google",
       "url": "https://www.google.com/search?q={query}",
+      "icon": "google",
       "enabled": false
     },
     {
       "name": "Google Definition",
       "url": "https://www.google.com/search?q=define+{query}",
+      "icon": "search",
       "enabled": false
     },
     {
       "name": "Forvo (pronunciation)",
       "url": "https://forvo.com/word/{query_path}/",
+      "icon": "",
       "enabled": false
     },
     {
       "name": "YouGlish (word in real videos)",
       "url": "https://youglish.com/pronounce/{query_path}/english",
+      "icon": "",
       "enabled": false
     }
   ]

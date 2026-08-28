@@ -27,8 +27,11 @@ python tools\check_addon.py
    - **Tags** / keywords: `context menu`, `youtube`, `google images`, `search`,
      `vocabulary`, `images`
    - **Support page**: `https://github.com/Nikhilsinha666/anki-context-search/issues`
-   - **Supported Anki versions**: one branch, minimum `2.1.45`, maximum left
-     empty. Only use version numbers that Anki has actually released.
+   - **Branches**: one branch, `Supports: 2.1.45 to 25.09`. Both boxes must be
+     filled - an empty max box is rejected with "invalid version range". Only
+     use version numbers Anki has actually released. A plain max does not block
+     newer Anki versions; that needs a `-` prefix (`-25.09`). `0` and `0` in
+     both boxes is the form default and means "every version".
    - **File**: `dist\context_search.ankiaddon`
 4. Submit. AnkiWeb gives the add-on a numeric id, and the install code users
    paste into `Tools > Add-ons > Get Add-ons` is that same id.
@@ -72,6 +75,9 @@ The `build` workflow validates the package on every push and, for `v*` tags,
 creates a GitHub release with the `.ankiaddon` attached.
 
 ## If the upload fails
+
+**"invalid version range".** A branch has an empty or reversed min/max box.
+Fill both, e.g. `2.1.45` to `25.09`.
 
 **"Bad Request" with no explanation.** The form posts to
 `/svc/shared/upload-addon` and answers with a bare HTTP 400. Reported several
