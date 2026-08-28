@@ -7,8 +7,10 @@ Images must point at a RAW file URL - a normal github.com/.../blob/... link
 shows nothing. Most attributes (width, height, alt) get stripped, so keep the
 img tags bare and upload screenshots that already have the size you want.
 
-The image URLs already point at this repo, so they start working as soon as
-the screenshots are pushed to the main branch.
+One screenshot is linked (screenshots/01-context-menu.png) and its URL already
+points at this repo, so it renders as soon as the file is on the main branch.
+Add more <img> lines later if you take more screenshots - but only for files
+that actually exist, otherwise the page shows a broken image.
 -->
 
 ---
@@ -23,7 +25,7 @@ Handy when a card needs a picture or a real-world example: select the word, righ
 
 1. Select any word or phrase on the card you are reviewing.
 2. Right-click the selection.
-3. Pick **Context search â†’ YouTube** or **Context search â†’ Google Images**.
+3. Pick **Context search > YouTube** or **Context search > Google Images**.
 
 The search opens in your normal web browser.
 
@@ -36,8 +38,6 @@ The search opens in your normal web browser.
 The entries only show up when something is actually selected, so your usual
 right-click menu stays exactly as it was.
 
-<img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/02-editor-menu.png">
-
 ### The selection is cleaned up first
 
 - `{{c1::word}}` is searched as `word`
@@ -47,9 +47,7 @@ right-click menu stays exactly as it was.
 
 ### Configuration
 
-`Tools â†’ Add-ons â†’ Context Search (YouTube & Google Images) â†’ Config`
-
-<img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/03-config.png">
+`Tools > Add-ons > Context Search (YouTube & Google Images) > Config`
 
 - rename the submenu, or drop the searches straight into the right-click menu
 - turn it off per screen (reviewer / editor / More menu)

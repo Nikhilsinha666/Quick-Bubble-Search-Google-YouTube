@@ -9,11 +9,10 @@ are - if you rename one, update `docs/ankiweb-description.md` too.
 | `02-editor-menu.png`  | Add or Browse editor, a word selected, same submenu open             |
 | `03-config.png`       | `Tools > Add-ons > Context Search > Config` window                   |
 
-`01-context-menu.png` currently holds a placeholder: the real menu widgets
-rendered outside Anki, so the page is not imageless on day one. Replace it with
-a proper capture that shows the card behind the menu. `02` and `03` are not in
-the repo yet - until you add them, those two `<img>` tags in the AnkiWeb
-description show nothing, so either take the shots or delete those two lines.
+Only `01-context-menu.png` exists so far, and it is the single image linked from
+the AnkiWeb description. `02` and `03` are optional: take them whenever you
+like, then add an `<img>` line for each in `docs/ankiweb-description.md`. Never
+link a file that is not in the repo - the add-on page would show a broken image.
 
 ## Taking them on Windows
 
