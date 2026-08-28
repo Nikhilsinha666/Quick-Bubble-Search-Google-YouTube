@@ -5,9 +5,9 @@ are - if you rename one, update `docs/ankiweb-description.md` too.
 
 | File                  | What to capture                                                      |
 | --------------------- | -------------------------------------------------------------------- |
-| `01-context-menu.png` | Reviewer, a word selected on the card, `Context search` submenu open |
-| `02-editor-menu.png`  | Add or Browse editor, a word selected, same submenu open             |
-| `03-config.png`       | `Tools > Add-ons > Context Search > Config` window                   |
+| `01-context-menu.png` | Reviewer, a word clicked on the card, floating icons showing              |
+| `02-editor-menu.png`  | Add or Browse editor, a word selected, right-click submenu open           |
+| `03-config.png`       | `Tools > Add-ons > Context Search (YouTube & Google Images) > Config`     |
 
 Only `01-context-menu.png` exists so far, and it is the single image linked from
 the AnkiWeb description. `02` and `03` are optional: take them whenever you

@@ -1,4 +1,4 @@
-## Context Search
+## Context Search (YouTube & Google Images)
 
 Click or select a word on a card and small search icons appear next to it.
 The same searches are also in the right-click menu.
@@ -17,9 +17,11 @@ screen. Press `Esc`, scroll, or click elsewhere to dismiss them.
 
 ### Right-click menu
 
-- **use_submenu** - `true` puts the searches inside a `Context search` submenu,
-  `false` puts them straight into the right-click menu.
-- **submenu_label** - name of that submenu.
+- **use_submenu** - `true` puts the searches inside a
+  `Context Search (YouTube & Google Images)` submenu, `false` puts them straight
+  into the right-click menu.
+- **submenu_label** - name of that submenu. It defaults to the add-on's full
+  name; shorten it here if you want a smaller right-click menu.
 - **enable_in_reviewer** - show the searches while reviewing / previewing cards.
   Set this to `false` if you only want the floating icons there.
 - **enable_in_editor** - show the searches in the note editor (Add and Browse).

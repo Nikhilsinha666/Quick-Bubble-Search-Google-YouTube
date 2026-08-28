@@ -1,9 +1,10 @@
-﻿# Context Search for Anki
+﻿# Context Search (YouTube & Google Images)
 
-Click a word on a flashcard and small **YouTube** and **Google Images** icons
-appear right next to it. One click opens the search in your browser.
+An Anki add-on. Click a word on a flashcard and small **YouTube** and
+**Google Images** icons appear right next to it. One click opens the search in
+your browser.
 
-![Context search in the reviewer](screenshots/01-context-menu.png)
+![Context Search (YouTube & Google Images) in the reviewer](screenshots/01-context-menu.png)
 
 Two ways to use it:
 
@@ -47,7 +48,11 @@ dismisses the icons.
 
 1. Select a word or phrase.
 2. Right-click it.
-3. Choose `Context search > YouTube: "..."` or `Context search > Google Images: "..."`.
+3. Choose `Context Search (YouTube & Google Images) > YouTube: "..."` or the
+   `Google Images: "..."` entry next to it.
+
+That submenu is named after the add-on. Shorten it with `submenu_label` in the
+config if it takes up too much room.
 
 The search opens in your normal web browser.
 

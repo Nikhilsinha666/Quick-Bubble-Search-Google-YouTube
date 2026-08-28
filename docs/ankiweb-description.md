@@ -28,7 +28,7 @@ Handy when a card needs a picture or a real-world example: click the word, click
 
 Dragging across a whole phrase works too. `Esc`, scrolling, or clicking somewhere else makes the icons go away.
 
-Prefer the old way? The same searches are also in the **right-click** menu, under **Context search**.
+Prefer the old way? The same searches are also in the **right-click** menu, under **Context Search (YouTube & Google Images)**.
 
 ### Where it works
 

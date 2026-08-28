@@ -1,4 +1,4 @@
-/* Context Search - floating search icons for the selected text.
+/* Context Search (YouTube & Google Images) - floating icons for the selection.
  *
  * Injected into the reviewer / previewer webview by __init__.py.
  * Select (or click) a word on the card and a small bubble with one icon per
@@ -121,7 +121,7 @@
     bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.setAttribute("role", "toolbar");
-    bubble.setAttribute("aria-label", "Context search");
+    bubble.setAttribute("aria-label", "Context Search (YouTube & Google Images)");
 
     searches().forEach(function (entry, index) {
       var button = document.createElement("button");

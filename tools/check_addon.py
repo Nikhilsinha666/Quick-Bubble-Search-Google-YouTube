@@ -33,8 +33,8 @@ def ok(msg: str) -> None:
     print(f"[ok]   {msg}")
 
 
-def load_default_config() -> dict | None:
-    """Pull DEFAULT_CONFIG out of __init__.py without importing aqt."""
+def module_constant(name: str):
+    """Read a top-level literal from __init__.py without importing aqt."""
     source = (ADDON / "__init__.py").read_text(encoding="utf-8")
     tree = ast.parse(source, "__init__.py")
     for node in tree.body:
@@ -42,11 +42,15 @@ def load_default_config() -> dict | None:
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         for target in targets:
-            if isinstance(target, ast.Name) and target.id == "DEFAULT_CONFIG":
+            if isinstance(target, ast.Name) and target.id == name:
                 if node.value is None:
                     return None
                 return ast.literal_eval(node.value)
     return None
+
+
+def load_default_config() -> dict | None:
+    return module_constant("DEFAULT_CONFIG")
 
 
 def main() -> int:
@@ -69,6 +73,7 @@ def main() -> int:
         ok("no __pycache__ folders")
 
     config: dict | None = None
+    manifest: dict | None = None
     for name in ("config.json", "manifest.json"):
         path = ADDON / name
         if not path.is_file():
@@ -83,6 +88,7 @@ def main() -> int:
         if name == "config.json":
             config = data
         else:
+            manifest = data
             for key in ("package", "name"):
                 if not data.get(key):
                     fail(f"manifest.json is missing '{key}'")
@@ -93,6 +99,35 @@ def main() -> int:
         fail("missing config.md (shown in Anki's config screen)")
     else:
         ok("config.md present")
+
+    # the add-on should call itself the same thing everywhere the user can see
+    addon_name = module_constant("ADDON_NAME")
+    if not addon_name:
+        fail("could not find ADDON_NAME in __init__.py")
+    else:
+        manifest_name = (manifest or {}).get("name")
+        if manifest_name != addon_name:
+            fail(f"manifest name {manifest_name!r} != ADDON_NAME {addon_name!r}")
+        else:
+            ok(f"name consistent: {addon_name!r}")
+
+        submenu = (config or {}).get("submenu_label")
+        if submenu != addon_name:
+            fail(f"config.json submenu_label {submenu!r} != ADDON_NAME {addon_name!r}")
+        else:
+            ok("config.json submenu_label matches the add-on name")
+
+        js = ADDON / "web" / "ctxsearch.js"
+        if js.is_file() and addon_name not in js.read_text(encoding="utf-8"):
+            fail(f"{js.name} does not mention the add-on name")
+        elif js.is_file():
+            ok("ctxsearch.js mentions the add-on name")
+
+        heading = (ADDON / "config.md").read_text(encoding="utf-8").splitlines()[0]
+        if addon_name not in heading:
+            fail(f"config.md heading {heading!r} does not use the add-on name")
+        else:
+            ok("config.md heading uses the add-on name")
 
     defaults = load_default_config()
     if defaults is None:

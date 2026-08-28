@@ -18,8 +18,16 @@ python tools\check_addon.py
 
 ## 2. Upload
 
+The add-on is already listed on AnkiWeb, so this is an **update**: open
+<https://ankiweb.net/shared/addons/>, click the existing
+`Context Search (YouTube & Google Images)` entry, and upload the new
+`dist\context_search.ankiaddon` on that same page. Do not create a second
+listing - existing users only get updates through the original one.
+
+The form is the same either way:
+
 1. Log in to AnkiWeb, open <https://ankiweb.net/shared/addons/>.
-2. Click **Upload**.
+2. Click the existing add-on (or **Upload** for a brand new one).
 3. Fill in the form:
    - **Title**: `Context Search (YouTube & Google Images)`
    - **Description**: paste the text from `docs/ankiweb-description.md`

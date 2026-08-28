@@ -1,4 +1,4 @@
-"""Context Search - Anki add-on.
+"""Context Search (YouTube & Google Images) - Anki add-on.
 
 Select (or click) a word on a card and a small bubble with one icon per search
 provider appears next to it - click an icon to search that word on YouTube or
@@ -45,8 +45,15 @@ except ImportError:  # pragma: no cover - very old Anki builds
         print(msg)
 
 
+# the add-on's name, used for the submenu, tooltips and the popup's aria-label.
+# Keep it identical to "name" in manifest.json.
+ADDON_NAME = "Context Search (YouTube & Google Images)"
+
 # ---------------------------------------------------------------------------
 # defaults (kept in sync with config.json, used as a fallback + validator)
+#
+# Plain literals only: tools/check_addon.py reads this dict with
+# ast.literal_eval to prove it matches config.json.
 # ---------------------------------------------------------------------------
 
 DEFAULT_CONFIG: dict[str, Any] = {
@@ -54,7 +61,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "popup_trigger": "click",
     "popup_icon_size": 30,
     "use_submenu": True,
-    "submenu_label": "Context search",
+    "submenu_label": "Context Search (YouTube & Google Images)",
     "enable_in_reviewer": True,
     "enable_in_editor": True,
     "enable_in_more_menu": True,
@@ -231,7 +238,7 @@ def run_search(name: str, template: str, query: str) -> None:
     try:
         openLink(url)
     except Exception as exc:  # pragma: no cover - depends on desktop env
-        tooltip(f"Context Search: could not open {name} ({exc})")
+        tooltip(f"{ADDON_NAME}: could not open {name} ({exc})")
 
 
 def _escape_amp(text: str) -> str:
@@ -264,7 +271,7 @@ def add_menu_items(menu: QMenu, query: str, cfg: dict[str, Any]) -> None:
 
     target: Any = menu
     if cfg.get("use_submenu", True):
-        label = str(cfg.get("submenu_label") or "Context search")
+        label = str(cfg.get("submenu_label") or ADDON_NAME)
         submenu = menu.addMenu(_escape_amp(label))
         if submenu is None:
             return
@@ -408,7 +415,7 @@ def on_js_message(
 
     query = clean_selection(parts[2], cfg)
     if not query:
-        tooltip("Context Search: nothing to search")
+        tooltip(f"{ADDON_NAME}: nothing to search")
         return (True, None)
 
     entry = searches[index]

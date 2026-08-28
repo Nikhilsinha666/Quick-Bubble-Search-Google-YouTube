@@ -13,6 +13,9 @@
 - The right-click menu is unchanged and still works everywhere, including the
   note editor. Set `enable_in_reviewer` to `false` if you only want the icons
   while reviewing.
+- The right-click submenu is now labelled with the add-on's full name,
+  `Context Search (YouTube & Google Images)`, so the naming matches AnkiWeb,
+  the add-on list and the config screen. `submenu_label` still overrides it.
 
 ## 1.0.0 - 2026-08-28
 
