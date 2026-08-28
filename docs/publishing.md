@@ -26,7 +26,9 @@ python tools\check_addon.py
      (everything below the `---` line), with `Nikhilsinha666` replaced.
    - **Tags** / keywords: `context menu`, `youtube`, `google images`, `search`,
      `vocabulary`, `images`
-   - **Supported Anki versions**: 2.1.45 and up.
+   - **Support page**: `https://github.com/Nikhilsinha666/anki-context-search/issues`
+   - **Supported Anki versions**: one branch, minimum `2.1.45`, maximum left
+     empty. Only use version numbers that Anki has actually released.
    - **File**: `dist\context_search.ankiaddon`
 4. Submit. AnkiWeb gives the add-on a numeric id, and the install code users
    paste into `Tools > Add-ons > Get Add-ons` is that same id.
@@ -68,6 +70,26 @@ git push origin v1.0.1
 
 The `build` workflow validates the package on every push and, for `v*` tags,
 creates a GitHub release with the `.ankiaddon` attached.
+
+## If the upload fails
+
+**"Bad Request" with no explanation.** The form posts to
+`/svc/shared/upload-addon` and answers with a bare HTTP 400. Reported several
+times on the Anki forums, and the cause each time was the version range in the
+form, not the package - see
+[this thread](https://forums.ankiweb.net/t/add-on-upload-returns-bad-request-400-even-for-a-minimal-one-file-add-on/70784)
+and the [one it links to](https://forums.ankiweb.net/t/i-cant-upload-my-first-addon-my-account-is-not-new/70532).
+Fix: put a real released version in the minimum field (`2.1.45`, `2.1.50`,
+`25.02`...), leave the maximum empty, and do not invent numbers like `26.99`.
+(Content rephrased for compliance with licensing restrictions.)
+
+**"Account is too new".** AnkiWeb blocks add-on uploads from fresh accounts.
+Nothing to fix in the package - use an older account or wait.
+
+**"AnkiWeb will not accept the zip".** Almost always a `__pycache__` folder or
+the add-on files sitting inside a `context_search/` folder in the archive.
+`build.ps1` avoids both; `python tools\check_addon.py` fails loudly if a
+`__pycache__` shows up.
 
 ## Notes
 
