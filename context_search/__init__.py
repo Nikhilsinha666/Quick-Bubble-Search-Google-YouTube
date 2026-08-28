@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 from typing import Any, Callable
 
@@ -88,7 +89,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "name": "Google",
             "url": "https://www.google.com/search?q={query}",
             "icon": "google",
-            "enabled": False,
+            "enabled": True,
         },
         {
             "name": "Google Definition",
@@ -132,8 +133,27 @@ def _as_int(value: Any, fallback: int) -> int:
         return fallback
 
 
-def get_config() -> dict[str, Any]:
-    """Return the user config merged onto the defaults, fully validated."""
+def normalize_search(raw: Any) -> dict[str, Any] | None:
+    """Clean up one entry of the searches list, or None if it is unusable."""
+    if not isinstance(raw, dict):
+        return None
+    url = str(raw.get("url") or "").strip()
+    if not url:
+        return None
+    return {
+        "name": str(raw.get("name") or "").strip() or "Search",
+        "url": url,
+        # not lowercased: an icon may be a file name or an emoji
+        "icon": str(raw.get("icon") or "").strip(),
+        "enabled": bool(raw.get("enabled", True)),
+    }
+
+
+def get_raw_config() -> dict[str, Any]:
+    """User config merged onto the defaults, including disabled searches.
+
+    This is what the settings dialog edits.
+    """
     cfg = copy.deepcopy(DEFAULT_CONFIG)
 
     user: Any = None
@@ -148,23 +168,52 @@ def get_config() -> dict[str, Any]:
             if key in cfg:
                 cfg[key] = value
 
-    searches: list[dict[str, str]] = []
+    searches: list[dict[str, Any]] = []
     raw_searches = cfg.get("searches")
     if isinstance(raw_searches, list):
         for raw in raw_searches:
-            if not isinstance(raw, dict):
-                continue
-            if not raw.get("enabled", True):
-                continue
-            url = str(raw.get("url") or "").strip()
-            if not url:
-                continue
-            name = str(raw.get("name") or "").strip() or "Search"
-            icon = str(raw.get("icon") or "").strip().lower()
-            searches.append({"name": name, "url": url, "icon": icon})
+            entry = normalize_search(raw)
+            if entry is not None:
+                searches.append(entry)
     cfg["searches"] = searches
 
     return cfg
+
+
+def get_config() -> dict[str, Any]:
+    """Runtime config: `searches` holds only the enabled ones, in order."""
+    cfg = get_raw_config()
+    cfg["searches"] = [
+        {"name": entry["name"], "url": entry["url"], "icon": entry["icon"]}
+        for entry in cfg["searches"]
+        if entry["enabled"]
+    ]
+    return cfg
+
+
+def save_config(cfg: dict[str, Any]) -> None:
+    if mw is None:
+        return
+    try:
+        mw.addonManager.writeConfig(__name__, cfg)
+    except Exception:
+        pass
+
+
+def refresh_webviews() -> None:
+    """Tell any open card webview to re-read the config and rebuild the icons."""
+    if mw is None:
+        return
+    js = "if (window.__ctxSearch && window.__ctxSearch.refresh) { window.__ctxSearch.refresh(); }"
+    seen: list[Any] = []
+    for web in (getattr(mw, "web", None), getattr(getattr(mw, "reviewer", None), "web", None)):
+        if web is None or any(web is other for other in seen):
+            continue
+        seen.append(web)
+        try:
+            web.eval(js)
+        except Exception:
+            pass
 
 
 def clean_selection(text: str, cfg: dict[str, Any]) -> str:
@@ -330,17 +379,27 @@ _POPUP_CONTEXTS = {
 _JS_PREFIX = "ctxsearch:"
 
 
+_ICON_SUFFIXES = "png|jpg|jpeg|gif|webp|svg"
+
+
 def _register_web_exports() -> None:
     if mw is None:
         return
     try:
-        mw.addonManager.setWebExports(__name__, r"web/.*\.(css|js|svg|png)")
+        mw.addonManager.setWebExports(
+            __name__, rf"(web|user_files)/.*\.(css|js|{_ICON_SUFFIXES})"
+        )
     except Exception:
         pass
 
 
-def _web_folder_url() -> str:
-    """URL Anki serves this add-on's web/ folder from.
+def user_icons_dir() -> str:
+    """Folder for icons the user adds. user_files survives add-on updates."""
+    return os.path.join(os.path.dirname(__file__), "user_files", "icons")
+
+
+def _addon_url() -> str:
+    """URL Anki serves this add-on's folder from.
 
     The package is the add-on folder name: "context_search" when installed from
     source, a numeric id when installed from AnkiWeb. addonFromModule() is the
@@ -352,7 +411,15 @@ def _web_folder_url() -> str:
             package = mw.addonManager.addonFromModule(__name__) or package
         except Exception:
             pass
-    return f"/_addons/{package}/web"
+    return f"/_addons/{package}"
+
+
+def _web_folder_url() -> str:
+    return f"{_addon_url()}/web"
+
+
+def _user_icons_url() -> str:
+    return f"{_addon_url()}/user_files/icons"
 
 
 def _is_popup_context(context: Any) -> bool:
@@ -369,6 +436,7 @@ def _popup_payload(cfg: dict[str, Any]) -> dict[str, Any]:
         "trigger": trigger,
         "icon_size": _as_int(cfg.get("popup_icon_size"), 30),
         "max_query_chars": _as_int(cfg.get("max_query_chars"), 200),
+        "icon_base": _user_icons_url(),
         "searches": [
             {"name": entry["name"], "icon": entry.get("icon", "")}
             for entry in cfg.get("searches") or []
@@ -400,20 +468,26 @@ def on_js_message(
     if not isinstance(message, str) or not message.startswith(_JS_PREFIX):
         return handled
 
-    parts = message.split(":", 2)
-    if len(parts) != 3:
+    body = message[len(_JS_PREFIX) :]
+
+    # the popup asks for a fresh config after the settings are saved
+    if body == "config":
+        return (True, _popup_payload(get_config()))
+
+    parts = body.split(":", 1)
+    if len(parts) != 2:
         return (True, None)
 
     cfg = get_config()
     searches = cfg.get("searches") or []
     try:
-        index = int(parts[1])
+        index = int(parts[0])
     except (TypeError, ValueError):
         return (True, None)
     if not 0 <= index < len(searches):
         return (True, None)
 
-    query = clean_selection(parts[2], cfg)
+    query = clean_selection(parts[1], cfg)
     if not query:
         tooltip(f"{ADDON_NAME}: nothing to search")
         return (True, None)
@@ -459,5 +533,22 @@ def register_hooks() -> None:
             pass
 
 
+def register_settings() -> None:
+    """Hook up the settings dialog: gear > Config, and the Tools menu."""
+    if mw is None:
+        return
+    try:
+        from . import settings
+    except Exception as exc:  # pragma: no cover - keeps the add-on usable
+        print(f"{ADDON_NAME}: settings dialog unavailable ({exc})")
+        return
+    try:
+        mw.addonManager.setConfigAction(__name__, settings.open_settings)
+    except Exception:
+        pass
+    settings.add_tools_menu_action()
+
+
 _register_web_exports()
 register_hooks()
+register_settings()

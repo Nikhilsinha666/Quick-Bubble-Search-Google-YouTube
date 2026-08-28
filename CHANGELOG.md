@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 - 2026-08-28
+
+- New: a settings window instead of raw JSON. Open it from
+  `Tools > Context Search (YouTube & Google Images)...` or the **Config** button
+  in `Tools > Add-ons`.
+- Add any website as a search: name, URL, icon, and a **Test** button that runs
+  the search once so you can check the URL before saving. Searches can be
+  ticked, reordered and removed from the list.
+- Icons can be a built-in logo, a letter or emoji badge, or your own image file.
+  Images are copied into `user_files/icons/`, which survives add-on updates.
+- Google web search is now on by default, with a Google-coloured magnifier
+  icon, next to YouTube and Google Images.
+- Saving the settings updates the icons on the card straight away - no need to
+  leave and re-enter the review screen.
+
 ## 1.1.0 - 2026-08-28
 
 - New: floating search icons. Click (or select) a word on a card and a small

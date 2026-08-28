@@ -29,8 +29,10 @@
     ".dark button:hover { background: rgba(255,255,255,.15); }",
     "button:focus-visible { outline: 2px solid #4285f4; outline-offset: 1px; }",
     "svg { display: block; pointer-events: none; width: 68%; height: 68%; }",
+    "img { display: block; pointer-events: none; width: 78%; height: 78%;",
+    "  object-fit: contain; border-radius: 4px; }",
     ".letter { font-family: system-ui, sans-serif; font-weight: 600; color: #444;",
-    "  pointer-events: none; }",
+    "  line-height: 1; pointer-events: none; }",
     ".dark .letter { color: #e0e0e0; }",
   ].join("\n");
 
@@ -46,10 +48,16 @@
       '<path fill="#34a853" d="M3.6 17.6l4.9-5.5 3.2 3.6 2.7-3 5.4 4.9z"/>' +
       '<path fill="#ea4335" d="M11.7 15.7l2.7-3 5.4 4.9h-5.5z"/>' +
       '<rect x="2" y="4.5" width="20" height="15" rx="2.5" fill="none" stroke="#4285f4" stroke-width="1.7"/></svg>',
+    // magnifying glass with the four Google colours, one per quarter of the ring
     google:
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-      '<circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="#4285f4" stroke-width="2"/>' +
-      '<path stroke="#34a853" stroke-width="2.4" stroke-linecap="round" d="M15.2 15.2 20 20"/></svg>',
+      '<g fill="none" stroke-width="2.7" stroke-dasharray="9.74 29.22">' +
+      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#4285f4" transform="rotate(-90 10.5 10.5)"/>' +
+      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#ea4335"/>' +
+      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#fbbc05" transform="rotate(90 10.5 10.5)"/>' +
+      '<circle cx="10.5" cy="10.5" r="6.2" stroke="#34a853" transform="rotate(180 10.5 10.5)"/>' +
+      "</g>" +
+      '<path stroke="#4285f4" stroke-width="2.7" stroke-linecap="round" d="M15.5 15.5 20 20"/></svg>',
     search:
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       '<circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" stroke-width="2"/>' +
@@ -89,14 +97,47 @@
     }
   }
 
-  function iconMarkup(entry) {
-    var key = String(entry.icon || "").toLowerCase();
+  /* Icon values: a built-in key ("youtube"), "text:W" / "W" / an emoji for a
+   * badge, or "file:name.png" for an image the user added in the settings. */
+  function applyIcon(button, entry, size) {
+    var raw = String(entry.icon || "");
+    var key = raw.toLowerCase();
+
     if (ICONS[key]) {
-      return ICONS[key];
+      button.innerHTML = ICONS[key];
+      return;
     }
-    var name = String(entry.name || "?");
-    var letter = name.charAt(0).toUpperCase() || "?";
-    return '<span class="letter" aria-hidden="true">' + letter + "</span>";
+
+    if (key.indexOf("file:") === 0) {
+      var file = raw.slice(5);
+      var base = String(cfg().icon_base || "");
+      if (file && base) {
+        var img = document.createElement("img");
+        img.src = base + "/" + encodeURIComponent(file);
+        img.alt = "";
+        button.appendChild(img);
+        return;
+      }
+    }
+
+    var text = key.indexOf("text:") === 0 ? raw.slice(5) : raw;
+    var fromName = false;
+    if (!text) {
+      text = String(entry.name || "?");
+      fromName = true;
+    }
+    // Array.from keeps emoji surrogate pairs together
+    var chars = typeof Array.from === "function" ? Array.from(text) : text.split("");
+    var display = chars.slice(0, fromName ? 1 : 2).join("");
+    if (display.length === 1) {
+      display = display.toUpperCase();
+    }
+
+    var span = document.createElement("span");
+    span.className = "letter";
+    span.style.fontSize = Math.round(size * 0.48) + "px";
+    span.textContent = display;
+    button.appendChild(span);
   }
 
   function build() {
@@ -130,7 +171,7 @@
       button.style.height = size + "px";
       button.title = entry.name || "Search";
       button.setAttribute("aria-label", entry.name || "Search");
-      button.innerHTML = iconMarkup(entry);
+      applyIcon(button, entry, size);
       button.addEventListener("mousedown", function (event) {
         // keep the selection alive while the button is pressed
         event.preventDefault();
@@ -195,15 +236,54 @@
     host.style.top = Math.round(top) + "px";
   }
 
+  function bridge() {
+    return window.pycmd || window.bridgeCommand;
+  }
+
   function run(index) {
     var text = query;
     hide();
     if (!text) {
       return;
     }
-    var bridge = window.pycmd || window.bridgeCommand;
-    if (typeof bridge === "function") {
-      bridge("ctxsearch:" + index + ":" + text);
+    var send = bridge();
+    if (typeof send === "function") {
+      send("ctxsearch:" + index + ":" + text);
+    }
+  }
+
+  function destroy() {
+    if (host && host.parentNode) {
+      host.parentNode.removeChild(host);
+    }
+    host = null;
+    bubble = null;
+    query = "";
+  }
+
+  /* Called from Python after the settings are saved, so the icons update
+   * without having to leave and re-enter the review screen. */
+  function refresh() {
+    destroy();
+    var send = bridge();
+    if (typeof send !== "function") {
+      return;
+    }
+    try {
+      send("ctxsearch:config", function (data) {
+        if (typeof data === "string") {
+          try {
+            data = JSON.parse(data);
+          } catch (err) {
+            data = null;
+          }
+        }
+        if (data && typeof data === "object") {
+          config = data;
+        }
+      });
+    } catch (err) {
+      // no callback support: the new settings apply on the next card
     }
   }
 
@@ -348,5 +428,5 @@
   window.addEventListener("scroll", hide, true);
   window.addEventListener("resize", hide);
 
-  window.__ctxSearch = { hide: hide };
+  window.__ctxSearch = { hide: hide, refresh: refresh };
 })();

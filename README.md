@@ -1,8 +1,8 @@
 ﻿# Context Search (YouTube & Google Images)
 
-An Anki add-on. Click a word on a flashcard and small **YouTube** and
-**Google Images** icons appear right next to it. One click opens the search in
-your browser.
+An Anki add-on. Click a word on a flashcard and small **YouTube**,
+**Google Images** and **Google** icons appear right next to it. One click opens
+the search in your browser. Any other website can be added from the settings.
 
 ![Context Search (YouTube & Google Images) in the reviewer](screenshots/01-context-menu.png)
 
@@ -60,23 +60,24 @@ The selection is tidied up before searching: `{{c1::word}}` is searched as
 `word`, `[sound:...]` tags are dropped, line breaks collapse into spaces, and
 surrounding quotes, brackets and commas are trimmed.
 
-## Configuration
+## Settings
 
-`Tools > Add-ons > Context Search (YouTube & Google Images) > Config`
+`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button
+next to the add-on in `Tools > Add-ons`.
 
-- `popup_enabled` - turn the floating icons off
-- `popup_trigger` - `click` shows the icons on a single click, `selection` only
-  when you select text yourself
-- `popup_icon_size` - icon size in pixels
-- rename the submenu, or put the searches straight into the right-click menu
-- switch the menu off per screen (reviewer / editor / More menu)
-- add your own providers with a URL template:
+**Searches tab** - tick the ones you want, reorder them, and add any website
+with **Add...**: a name, the search URL, and an icon. **Test** runs the search
+once so you can check the URL before saving.
 
-```json
-{ "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search={query}", "icon": "search", "enabled": true }
-```
+**Behaviour tab** - turn the floating icons off, choose whether they appear on a
+single click or only on a manual selection, set the icon size, control the
+right-click menu per screen, and adjust how the selected text is cleaned up.
 
-Icons: `youtube`, `google-images`, `google`, `search`, or `""` for a letter badge.
+Saving applies everything immediately, icons included.
+
+### Search URLs
+
+Put a placeholder where the selected word goes:
 
 | Placeholder    | Encoding                              | Example                  |
 | -------------- | ------------------------------------- | ------------------------ |
@@ -84,20 +85,30 @@ Icons: `youtube`, `google-images`, `google`, `search`, or `""` for a letter badg
 | `{query_path}` | path segment, spaces become `%20`     | `/word/{query_path}/`    |
 | `{query_raw}`  | no encoding                           | special cases            |
 
-Google web search, Google definitions, Forvo and YouGlish ship pre-written but
-disabled - flip `"enabled": true` to use them. Every option is documented in
-[`context_search/config.md`](context_search/config.md), which is also what Anki
-shows next to the config editor.
+Without a placeholder the encoded word is appended to the end of the URL.
+
+### Icons
+
+A built-in logo (YouTube, Google, Google Images, magnifying glass), a letter or
+emoji badge, or your own image file. Chosen images are copied into
+`user_files/icons/`, which survives add-on updates.
+
+Google definitions, Forvo and YouGlish ship pre-written but unticked. Every
+config key is documented in
+[`context_search/config.md`](context_search/config.md) for anyone who prefers
+editing `config.json` directly.
 
 ## Development
 
 ```
 context_search/       the add-on itself
-  __init__.py         hooks + search logic
+  __init__.py         hooks, config and search logic
+  settings.py         the settings dialog
   web/ctxsearch.js    the floating icon bubble (injected into the card webview)
   config.json         default settings
-  config.md           config help shown inside Anki
+  config.md           reference for the config keys
   manifest.json       package id, name, version
+  user_files/icons/   images added through the settings (not in git)
 tools/check_addon.py  package sanity checks (no Anki needed)
 build.ps1             builds dist/context_search.ankiaddon
 docs/                 AnkiWeb description + publishing steps

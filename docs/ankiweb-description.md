@@ -15,16 +15,16 @@ that actually exist, otherwise the page shows a broken image.
 
 ---
 
-Click a word on a card and small **YouTube** and **Google Images** icons appear right next to it. One click opens the search in your browser.
+Click a word on a card and small **YouTube**, **Google Images** and **Google** icons appear right next to it. One click opens the search in your browser.
 
-Handy when a card needs a picture or a real-world example: click the word, click the icon, done.
+Handy when a card needs a picture or a real-world example: click the word, click the icon, done. Any other website can be added in the settings, with its own icon.
 
 <img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/01-context-menu.png">
 
 ### How to use
 
 1. Click any word on the card - it gets selected and the icons appear above it.
-2. Click the YouTube or the Google Images icon.
+2. Click the icon you want.
 
 Dragging across a whole phrase works too. `Esc`, scrolling, or clicking somewhere else makes the icons go away.
 
@@ -44,23 +44,21 @@ Nothing shows up until there is actually a selection, so it stays out of your wa
 - multi-line selections become a single line
 - quotes, brackets and commas around the selection are trimmed
 
-### Configuration
+### Settings
 
-`Tools > Add-ons > Context Search (YouTube & Google Images) > Config`
+`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button next to the add-on in `Tools > Add-ons`.
 
-- `popup_enabled` - turn the floating icons off and keep only the right-click menu
-- `popup_trigger` - `click` shows the icons on a single click, `selection` only when you select text yourself
-- `popup_icon_size` - how big the icons are
-- rename the submenu, or drop the searches straight into the right-click menu
-- turn the menu off per screen (reviewer / editor / More menu)
-- add your own search engines with a URL template:
+**Add any website you like.** Give it a name, paste the search URL with `{query}` where the word belongs, pick an icon, and hit **Test** to try it once before saving:
 
-```json
-{ "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search={query}", "icon": "search", "enabled": true }
+```
+https://en.wikipedia.org/w/index.php?search={query}
 ```
 
-Google web search, Google definitions, Forvo and YouGlish are already written
-in the config - just switch `"enabled"` to `true`.
+For icons you can use a built-in logo (YouTube, Google, Google Images, magnifying glass), a letter or emoji badge, or your own image file. Searches can be ticked, reordered and removed from the list.
+
+You can also turn the floating icons off, choose whether they appear on a single click or only when you select text yourself, change the icon size, control the right-click menu per screen, and adjust how the selected text is cleaned up.
+
+Google definitions, Forvo and YouGlish are already written in - just tick them.
 
 ### Notes
 

@@ -30,7 +30,7 @@
       "name": "Google",
       "url": "https://www.google.com/search?q={query}",
       "icon": "google",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "Google Definition",

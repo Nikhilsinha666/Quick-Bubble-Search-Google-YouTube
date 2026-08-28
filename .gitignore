@@ -7,6 +7,9 @@ dist/
 build_tmp/
 *.ankiaddon
 
+# icons the user adds through the settings dialog
+context_search/user_files/
+
 # per-user add-on state written by Anki
 meta.json
 

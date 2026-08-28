@@ -3,6 +3,14 @@
 Click or select a word on a card and small search icons appear next to it.
 The same searches are also in the right-click menu.
 
+**The easy way to change all of this is the settings window:**
+`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button
+next to the add-on in `Tools > Add-ons`. It lets you tick searches, reorder
+them, and add any website with its own icon.
+
+This file documents the underlying keys, in case you prefer editing
+`config.json` by hand.
+
 ### Floating icons
 
 - **popup_enabled** - `false` turns the floating icons off and leaves only the
@@ -46,9 +54,18 @@ A list of providers. Each entry has:
 
 - **name** - text shown in the menu, and the icon's tooltip.
 - **url** - the search URL, with a placeholder for the selected text.
-- **icon** - which icon to draw: `youtube`, `google-images`, `google`,
-  `search`, or `""` to just show the first letter of the name.
 - **enabled** - `false` hides the entry without deleting it.
+- **icon** - one of:
+
+| Value             | Result                                                     |
+| ----------------- | ---------------------------------------------------------- |
+| `youtube`         | YouTube logo                                               |
+| `google`          | Google-coloured magnifying glass                           |
+| `google-images`   | Google Images picture icon                                 |
+| `search`          | plain magnifying glass                                     |
+| `text:W`, `text:📖` | badge with that letter or emoji (1-2 characters)          |
+| `file:logo.png`   | image from `user_files/icons/` (the settings window puts it there for you) |
+| `""`              | badge with the first letter of the name                    |
 
 Placeholders you can use in **url**:
 
@@ -66,6 +83,8 @@ Example of an extra provider:
 { "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search={query}", "icon": "search", "enabled": true }
 ```
 
-Menu changes apply immediately. The floating icons are injected when a screen
-is built, so for those, close and reopen the review screen (or restart Anki)
-after changing the config.
+Saving from the settings window applies everything straight away, including the
+floating icons. If you edit `config.json` by hand instead, leave and re-enter
+the review screen for the icons to pick up the change.
+
+Images you add stay in `user_files/icons/`, which survives add-on updates.
