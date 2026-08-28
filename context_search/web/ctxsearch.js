@@ -41,10 +41,11 @@
       '<path fill="#ffffff" d="M9.8 15.5v-7l6 3.5z"/></svg>',
     "google-images":
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-      '<rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="#4285f4" stroke-width="2"/>' +
-      '<circle cx="8.2" cy="9.8" r="1.7" fill="#fbbc05"/>' +
-      '<path fill="#34a853" d="M5 17.2l3.9-4.4 2.7 2.9 2.3-2.5 4.1 4z"/>' +
-      '<circle cx="17.4" cy="8.3" r="1.4" fill="#ea4335"/></svg>',
+      '<rect x="2" y="4.5" width="20" height="15" rx="2.5" fill="#ffffff"/>' +
+      '<circle cx="7.6" cy="9.4" r="2" fill="#fbbc05"/>' +
+      '<path fill="#34a853" d="M3.6 17.6l4.9-5.5 3.2 3.6 2.7-3 5.4 4.9z"/>' +
+      '<path fill="#ea4335" d="M11.7 15.7l2.7-3 5.4 4.9h-5.5z"/>' +
+      '<rect x="2" y="4.5" width="20" height="15" rx="2.5" fill="none" stroke="#4285f4" stroke-width="1.7"/></svg>',
     google:
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       '<circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="#4285f4" stroke-width="2"/>' +
