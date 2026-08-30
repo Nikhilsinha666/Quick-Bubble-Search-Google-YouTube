@@ -1,6 +1,6 @@
-"""Settings dialog for Context Search (YouTube & Google Images).
+"""Settings dialog for Quick Bubble Search (Google & YouTube).
 
-Opened from `Tools > Context Search (YouTube & Google Images)...` and from the
+Opened from `Tools > Quick Bubble Search (Google & YouTube)...` and from the
 gear menu next to the add-on in `Tools > Add-ons`, so users never have to touch
 the raw JSON config.
 """
@@ -361,10 +361,12 @@ class SettingsDialog(QDialog):
         icons_form = QFormLayout(icons_group)
         self.popup_cb = QCheckBox("Show the search icons next to the word")
         icons_form.addRow(self.popup_cb)
-        self.trigger_combo = QComboBox()
-        self.trigger_combo.addItem("As soon as a word is clicked", "click")
-        self.trigger_combo.addItem("Only when I select text myself", "selection")
-        icons_form.addRow("Show them", self.trigger_combo)
+        self.click_cb = QCheckBox("Also select the word on a single click")
+        self.click_cb.setToolTip(
+            "Off: the icons appear for text you select yourself, by double-clicking\n"
+            "a word or dragging over a phrase."
+        )
+        icons_form.addRow(self.click_cb)
         self.size_spin = QSpinBox()
         self.size_spin.setRange(18, 64)
         self.size_spin.setSuffix(" px")
@@ -413,9 +415,7 @@ class SettingsDialog(QDialog):
     def _load(self) -> None:
         cfg = self._cfg
         self.popup_cb.setChecked(bool(cfg.get("popup_enabled", True)))
-        trigger = "selection" if str(cfg.get("popup_trigger")) == "selection" else "click"
-        index = self.trigger_combo.findData(trigger)
-        self.trigger_combo.setCurrentIndex(max(0, index))
+        self.click_cb.setChecked(bool(cfg.get("popup_select_on_click", False)))
         self.size_spin.setValue(int(cfg.get("popup_icon_size") or 30))
 
         self.reviewer_cb.setChecked(bool(cfg.get("enable_in_reviewer", True)))
@@ -472,7 +472,7 @@ class SettingsDialog(QDialog):
     def _save(self, *_: Any) -> None:
         cfg = dict(self._cfg)
         cfg["popup_enabled"] = self.popup_cb.isChecked()
-        cfg["popup_trigger"] = self.trigger_combo.currentData() or "click"
+        cfg["popup_select_on_click"] = self.click_cb.isChecked()
         cfg["popup_icon_size"] = self.size_spin.value()
         cfg["enable_in_reviewer"] = self.reviewer_cb.isChecked()
         cfg["enable_in_editor"] = self.editor_cb.isChecked()

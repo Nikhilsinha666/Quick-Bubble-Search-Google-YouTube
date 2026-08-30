@@ -1,15 +1,16 @@
-﻿# Context Search (YouTube & Google Images)
+﻿# Quick Bubble Search (Google & YouTube)
 
-An Anki add-on. Click a word on a flashcard and small **YouTube**,
+An Anki add-on. Double-click a word on a flashcard and small **YouTube**,
 **Google Images** and **Google** icons appear right next to it. One click opens
 the search in your browser. Any other website can be added from the settings.
 
-![Context Search (YouTube & Google Images) in the reviewer](screenshots/01-context-menu.png)
+![Quick Bubble Search (Google & YouTube) in the reviewer](screenshots/01-context-menu.png)
 
 Two ways to use it:
 
-- **Floating icons** - click (or select) a word while reviewing, in the card
-  previewer, or in the card layout screen. The icons show up next to the word.
+- **Floating icons** - double-click a word (or drag over a phrase) while
+  reviewing, in the card previewer, or in the card layout screen. The icons show
+  up next to the selection.
 - **Right-click menu** - the same searches, and this one also works in the note
   editor (**Add** and **Browse**) and in the reviewer **More** menu (`m` key).
 
@@ -26,7 +27,7 @@ way while you study. Either one can be switched off in the config.
 **From a release file**
 
 Download `context_search.ankiaddon` from the
-[releases page](https://github.com/Nikhilsinha666/anki-context-search/releases),
+[releases page](https://github.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube/releases),
 then double-click it, or use `Tools > Add-ons > Install from file...`.
 
 **From source**
@@ -49,7 +50,7 @@ dismisses the icons.
 
 1. Select a word or phrase.
 2. Right-click it.
-3. Choose `Context Search (YouTube & Google Images) > YouTube: "..."` or the
+3. Choose `Quick Bubble Search (Google & YouTube) > YouTube: "..."` or the
    `Google Images: "..."` entry next to it.
 
 That submenu is named after the add-on. Shorten it with `submenu_label` in the
@@ -63,16 +64,17 @@ surrounding quotes, brackets and commas are trimmed.
 
 ## Settings
 
-`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button
+`Tools > Quick Bubble Search (Google & YouTube)...`, or the **Config** button
 next to the add-on in `Tools > Add-ons`.
 
 **Searches tab** - tick the ones you want, reorder them, and add any website
 with **Add...**: a name, the search URL, and an icon. **Test** runs the search
 once so you can check the URL before saving.
 
-**Behaviour tab** - turn the floating icons off, choose whether they appear on a
-single click or only on a manual selection, set the icon size, control the
-right-click menu per screen, and adjust how the selected text is cleaned up.
+**Behaviour tab** - turn the floating icons off, let a single click select a word
+as well (off by default, so only a double-click or a drag selects), set the icon
+size, control the right-click menu per screen, and adjust how the selected text
+is cleaned up.
 
 Saving applies everything immediately, icons included.
 

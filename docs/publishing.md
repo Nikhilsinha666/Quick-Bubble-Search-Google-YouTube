@@ -19,22 +19,24 @@ python tools\check_addon.py
 ## 2. Upload
 
 The add-on is already listed on AnkiWeb, so this is an **update**: open
-<https://ankiweb.net/shared/addons/>, click the existing
-`Context Search (YouTube & Google Images)` entry, and upload the new
+<https://ankiweb.net/shared/addons/>, click the existing entry (listed as
+`Context Search YouTube Google Images` until the title is edited), rename the
+**Title** to `Quick Bubble Search (Google & YouTube)`, and upload the new
 `dist\context_search.ankiaddon` on that same page. Do not create a second
-listing - existing users only get updates through the original one.
+listing - existing users only get updates through the original one, and the
+install code `458766448` stays the same after a rename.
 
 The form is the same either way:
 
 1. Log in to AnkiWeb, open <https://ankiweb.net/shared/addons/>.
 2. Click the existing add-on (or **Upload** for a brand new one).
 3. Fill in the form:
-   - **Title**: `Context Search (YouTube & Google Images)`
+   - **Title**: `Quick Bubble Search (Google & YouTube)`
    - **Description**: paste the text from `docs/ankiweb-description.md`
      (everything below the `---` line), with `Nikhilsinha666` replaced.
-   - **Tags** / keywords: `context menu`, `youtube`, `google images`, `search`,
-     `vocabulary`, `images`
-   - **Support page**: `https://github.com/Nikhilsinha666/anki-context-search/issues`
+   - **Tags** / keywords: `google`, `youtube`, `google images`, `search`,
+     `context menu`, `vocabulary`, `images`
+   - **Support page**: `https://github.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube/issues`
    - **Branches**: one branch, `Supports: 2.1.45 to 25.09`. Both boxes must be
      filled - an empty max box is rejected with "invalid version range". Only
      use version numbers Anki has actually released. A plain max does not block
@@ -48,9 +50,32 @@ The form is the same either way:
    AnkiWeb, which is a quick way to look it up again.
 
 Note: AnkiWeb strips characters like `(`, `)` and `&` from the title, so the
-listing shows up as `Context Search YouTube Google Images`, and that stripped
-name is what Anki displays in the add-on list. The name inside the add-on
-(submenu, config screen, tooltips) keeps the full form.
+listing shows up as `Quick Bubble Search Google YouTube`, and that stripped name
+is what Anki displays in the add-on list. The name inside the add-on (submenu,
+config screen, tooltips) keeps the full form.
+
+The package folder stays `context_search` and so does the AnkiWeb id. Anki keys
+add-ons by folder / id, so renaming either would look like a different add-on
+and existing users would lose their settings.
+
+The GitHub repo is `Quick-Bubble-Search-Google-YouTube`, which every link in this
+repo now points at. A repo name may only hold letters, digits, `.`, `-` and `_`,
+so the spaces, brackets and `&` of the display name become hyphens - type the
+name above by hand in `Settings > General > Repository name` instead of pasting
+the display name, otherwise the hyphens may not land where these links expect.
+
+The full name with its brackets lives in the README heading and in the repo's
+**About** description, which take any characters.
+
+After the rename, point the local clone at the new URL:
+
+```powershell
+git remote set-url origin https://github.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube.git
+```
+
+GitHub redirects the old repo URL, so pushes keep working either way, but
+`raw.githubusercontent.com` links (the screenshots on the AnkiWeb page) need the
+new name.
 
 ## 3. Images on the add-on page
 
@@ -58,7 +83,7 @@ AnkiWeb has no image hosting and no image upload. Screenshots live in this
 repo, and the description links to their **raw** URLs:
 
 ```html
-<img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/01-context-menu.png">
+<img src="https://raw.githubusercontent.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube/main/screenshots/01-context-menu.png">
 ```
 
 - A `https://github.com/USER/REPO/blob/main/file.png` link renders nothing -

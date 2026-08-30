@@ -1,9 +1,9 @@
 {
   "popup_enabled": true,
-  "popup_trigger": "click",
+  "popup_select_on_click": false,
   "popup_icon_size": 30,
   "use_submenu": true,
-  "submenu_label": "Context Search (YouTube & Google Images)",
+  "submenu_label": "Quick Bubble Search (Google & YouTube)",
   "enable_in_reviewer": true,
   "enable_in_editor": true,
   "enable_in_more_menu": true,

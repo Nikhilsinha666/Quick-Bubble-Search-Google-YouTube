@@ -1,9 +1,13 @@
-/* Context Search (YouTube & Google Images) - floating icons for the selection.
+/* Quick Bubble Search (Google & YouTube) - floating icons for the selection.
  *
  * Injected into the reviewer / previewer webview by __init__.py.
- * Select (or click) a word on the card and a small bubble with one icon per
- * search provider appears next to it. Clicking an icon sends the selection to
- * Python via pycmd, which opens the search in the user's browser.
+ * Double-click a word on the card (or drag over some text) and a small bubble
+ * with one icon per search provider appears next to it. Clicking an icon sends
+ * the selection to Python via pycmd, which opens the search in the browser.
+ *
+ * Clicking empty space must never select anything, so every selection we make
+ * ourselves - and every word the browser picked on a double click - is checked
+ * against the pointer position first. See onMouseUp.
  *
  * The bubble lives in a shadow root so the note's own CSS cannot restyle it.
  */
@@ -73,10 +77,20 @@
 
   var WORD_BREAK = /[\s.,;:!?"'`()\[\]{}<>\/\\|~*_=+\u2026\u2014\u2013\u00ab\u00bb\u201c\u201d\u2018\u2019]/;
 
+  // how far the pointer may travel between mousedown and mouseup and still
+  // count as a click rather than a drag-selection
+  var MOVE_SLOP = 4;
+  // slack when testing "is the pointer on this text?", for thin glyphs and
+  // for the 1px rounding of the caret hit test
+  var HIT_SLOP = 2;
+
   var host = null;
   var bubble = null;
   var query = "";
   var config = null;
+  var pressX = 0;
+  var pressY = 0;
+  var pressed = false;
 
   function cfg() {
     // read lazily: this file may be evaluated before the inline config script
@@ -194,7 +208,7 @@
     bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.setAttribute("role", "toolbar");
-    bubble.setAttribute("aria-label", "Context Search (YouTube & Google Images)");
+    bubble.setAttribute("aria-label", "Quick Bubble Search (Google & YouTube)");
 
     searches().forEach(function (entry, index) {
       var button = document.createElement("button");
@@ -344,6 +358,63 @@
     return null;
   }
 
+  /* True when (x, y) - viewport coordinates - falls on one of the line boxes
+   * the range paints. caretRangeFromPoint happily snaps to the closest text
+   * position anywhere on the page, so this is what separates "clicked a word"
+   * from "clicked the empty space around it". */
+  function rangeHasPoint(range, x, y) {
+    if (!range) {
+      return false;
+    }
+    var rects = null;
+    try {
+      rects = range.getClientRects ? range.getClientRects() : null;
+    } catch (err) {
+      rects = null;
+    }
+    if (!rects || !rects.length) {
+      var single = range.getBoundingClientRect ? range.getBoundingClientRect() : null;
+      rects = single ? [single] : [];
+    }
+    for (var i = 0; i < rects.length; i++) {
+      var rect = rects[i];
+      if (!rect || (!rect.width && !rect.height)) {
+        continue;
+      }
+      if (
+        x >= rect.left - HIT_SLOP &&
+        x <= rect.right + HIT_SLOP &&
+        y >= rect.top - HIT_SLOP &&
+        y <= rect.bottom + HIT_SLOP
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function selectionHasPoint(selection, x, y) {
+    if (!selection || !selection.rangeCount) {
+      return false;
+    }
+    for (var i = 0; i < selection.rangeCount; i++) {
+      if (rangeHasPoint(selection.getRangeAt(i), x, y)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function clearSelection(selection) {
+    try {
+      if (selection && selection.rangeCount) {
+        selection.removeAllRanges();
+      }
+    } catch (err) {
+      /* nothing to undo */
+    }
+  }
+
   function wordRangeAt(x, y) {
     var range = caretRange(x, y);
     if (!range) {
@@ -376,6 +447,10 @@
     var word = document.createRange();
     word.setStart(node, start);
     word.setEnd(node, end);
+    // the caret snapped here from somewhere else: not a click on this word
+    if (!rangeHasPoint(word, x, y)) {
+      return null;
+    }
     return word;
   }
 
@@ -390,11 +465,27 @@
     return rect;
   }
 
+  function inBubble(node) {
+    return !!host && (node === host || (host.contains && host.contains(node)));
+  }
+
   function onMouseUp(event) {
-    if (event.button !== 0 || !searches().length) {
+    if (event.button !== 0) {
       return;
     }
-    if (host && (event.target === host || (host.contains && host.contains(event.target)))) {
+
+    var x = event.clientX;
+    var y = event.clientY;
+    // release the press first, so an early return below cannot leave a stale
+    // start point behind and turn the next click into a phantom drag
+    var dragged =
+      pressed && (Math.abs(x - pressX) > MOVE_SLOP || Math.abs(y - pressY) > MOVE_SLOP);
+    // 2 on a double click, 3 on a triple click: the browser selected a word or
+    // a paragraph for us
+    var multi = (event.detail || 1) > 1;
+    pressed = false;
+
+    if (!searches().length || inBubble(event.target)) {
       return;
     }
     if (isInteractive(event.target)) {
@@ -402,21 +493,37 @@
       return;
     }
 
-    var x = event.clientX;
-    var y = event.clientY;
-
     // let the browser finish updating the selection first
     setTimeout(function () {
       var selection = window.getSelection();
       var text = selection ? String(selection.toString()) : "";
 
-      if (!text.trim() && cfg().trigger !== "selection") {
-        var word = wordRangeAt(x, y);
-        if (word && selection) {
-          selection.removeAllRanges();
-          selection.addRange(word);
-          text = word.toString();
+      /* A double click in blank space still snaps to the nearest word in
+       * Chromium, so the pointer has to be on the text it selected - otherwise
+       * drop that selection again. Drags are exempt: releasing the button past
+       * the end of a line is a normal way to select. */
+      if (multi && !dragged && !selectionHasPoint(selection, x, y)) {
+        clearSelection(selection);
+        hide();
+        return;
+      }
+
+      if (!text.trim()) {
+        if (dragged || multi || !cfg().select_on_click) {
+          // nothing selected, and single-click word picking is off
+          hide();
+          return;
         }
+        // opt-in single click: select the word under the pointer, but only
+        // when the pointer really is over it
+        var word = wordRangeAt(x, y);
+        if (!word || !selection) {
+          hide();
+          return;
+        }
+        clearSelection(selection);
+        selection.addRange(word);
+        text = word.toString();
       }
 
       text = text.replace(/\s+/g, " ").trim();
@@ -440,8 +547,14 @@
   }
 
   function onMouseDown(event) {
-    if (host && host.contains && host.contains(event.target)) {
+    if (inBubble(event.target)) {
+      pressed = false;
       return;
+    }
+    if (event.button === 0) {
+      pressX = event.clientX;
+      pressY = event.clientY;
+      pressed = true;
     }
     hide();
   }

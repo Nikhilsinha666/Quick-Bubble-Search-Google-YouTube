@@ -1,9 +1,9 @@
-"""Context Search (YouTube & Google Images) - Anki add-on.
+"""Quick Bubble Search (Google & YouTube) - Anki add-on.
 
-Select (or click) a word on a card and a small bubble with one icon per search
-provider appears next to it - click an icon to search that word on YouTube or
-Google Images. The same searches are also available from the right-click menu,
-including inside the note editor. Providers are configurable.
+Double-click a word on a card and a small bubble with one icon per search
+provider appears next to it - click an icon to search that word on Google,
+Google Images or YouTube. The same searches are also available from the
+right-click menu, including inside the note editor. Providers are configurable.
 
 Hooks used:
     gui_hooks.webview_will_set_content          -> inject the popup JS/config
@@ -48,7 +48,14 @@ except ImportError:  # pragma: no cover - very old Anki builds
 
 # the add-on's name, used for the submenu, tooltips and the popup's aria-label.
 # Keep it identical to "name" in manifest.json.
-ADDON_NAME = "Context Search (YouTube & Google Images)"
+# The package folder stays "context_search": Anki keys add-ons by folder name,
+# so renaming it would look like a different add-on and orphan saved configs.
+ADDON_NAME = "Quick Bubble Search (Google & YouTube)"
+
+# names used before the add-on was renamed. `submenu_label` is a saved setting,
+# so a profile from an older version still holds the old name; it is replaced
+# with the current one unless the user picked a label of their own.
+LEGACY_NAMES = ("Context Search (YouTube & Google Images)",)
 
 # ---------------------------------------------------------------------------
 # defaults (kept in sync with config.json, used as a fallback + validator)
@@ -59,10 +66,10 @@ ADDON_NAME = "Context Search (YouTube & Google Images)"
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "popup_enabled": True,
-    "popup_trigger": "click",
+    "popup_select_on_click": False,
     "popup_icon_size": 30,
     "use_submenu": True,
-    "submenu_label": "Context Search (YouTube & Google Images)",
+    "submenu_label": "Quick Bubble Search (Google & YouTube)",
     "enable_in_reviewer": True,
     "enable_in_editor": True,
     "enable_in_more_menu": True,
@@ -167,6 +174,9 @@ def get_raw_config() -> dict[str, Any]:
         for key, value in user.items():
             if key in cfg:
                 cfg[key] = value
+
+    if str(cfg.get("submenu_label") or "").strip() in LEGACY_NAMES:
+        cfg["submenu_label"] = ADDON_NAME
 
     searches: list[dict[str, Any]] = []
     raw_searches = cfg.get("searches")
@@ -431,9 +441,10 @@ def _is_popup_context(context: Any) -> bool:
 
 
 def _popup_payload(cfg: dict[str, Any]) -> dict[str, Any]:
-    trigger = "selection" if str(cfg.get("popup_trigger", "")).lower() == "selection" else "click"
     return {
-        "trigger": trigger,
+        # off by default: only a double click or a drag selects a word, so a
+        # click on blank space cannot pop the icons up
+        "select_on_click": bool(cfg.get("popup_select_on_click", False)),
         "icon_size": _as_int(cfg.get("popup_icon_size"), 30),
         "max_query_chars": _as_int(cfg.get("max_query_chars"), 200),
         "icon_base": _user_icons_url(),

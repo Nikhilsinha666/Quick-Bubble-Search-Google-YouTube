@@ -15,20 +15,20 @@ that actually exist, otherwise the page shows a broken image.
 
 ---
 
-Click a word on a card and small **YouTube**, **Google Images** and **Google** icons appear right next to it. One click opens the search in your browser.
+Double-click a word on a card and a small bubble with **Google**, **Google Images** and **YouTube** icons appears right next to it. One click opens the search in your browser.
 
-Handy when a card needs a picture or a real-world example: click the word, click the icon, done. Any other website can be added in the settings, with its own icon.
+Handy when a card needs a picture or a real-world example: double-click the word, click the icon, done. Any other website can be added in the settings, with its own icon.
 
-<img src="https://raw.githubusercontent.com/Nikhilsinha666/anki-context-search/main/screenshots/01-context-menu.png">
+<img src="https://raw.githubusercontent.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube/main/screenshots/01-context-menu.png">
 
 ### How to use
 
-1. Click any word on the card - it gets selected and the icons appear above it.
+1. Double-click any word on the card - it gets selected and the icons appear above it.
 2. Click the icon you want.
 
-Dragging across a whole phrase works too. `Esc`, scrolling, or clicking somewhere else makes the icons go away.
+Dragging across a whole phrase works too. A single click on empty space selects nothing, so the icons never appear by accident. `Esc`, scrolling, or clicking somewhere else makes them go away.
 
-Prefer the old way? The same searches are also in the **right-click** menu, under **Context Search (YouTube & Google Images)**.
+Prefer the old way? The same searches are also in the **right-click** menu, under **Quick Bubble Search (Google & YouTube)**.
 
 ### Where it works
 
@@ -46,7 +46,7 @@ Nothing shows up until there is actually a selection, so it stays out of your wa
 
 ### Settings
 
-`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button next to the add-on in `Tools > Add-ons`.
+`Tools > Quick Bubble Search (Google & YouTube)...`, or the **Config** button next to the add-on in `Tools > Add-ons`.
 
 **Add any website you like.** Give it a name, paste the search URL with `{query}` where the word belongs, pick an icon, and hit **Test** to try it once before saving:
 
@@ -56,7 +56,7 @@ https://en.wikipedia.org/w/index.php?search={query}
 
 For icons you can use a built-in logo (YouTube, Google, Google Images, magnifying glass), a letter or emoji badge, or your own image file. Searches can be ticked, reordered and removed from the list.
 
-You can also turn the floating icons off, choose whether they appear on a single click or only when you select text yourself, change the icon size, control the right-click menu per screen, and adjust how the selected text is cleaned up.
+You can also turn the floating icons off, let a single click select a word as well (off by default, so only a double-click or a drag selects), change the icon size, control the right-click menu per screen, and adjust how the selected text is cleaned up.
 
 Google definitions, Forvo and YouGlish are already written in - just tick them.
 
@@ -66,4 +66,4 @@ Google definitions, Forvo and YouGlish are already written in - just tick them.
 - Works with Anki 2.1.45 and newer (tested on 25.09).
 
 Source code, bug reports and feature requests:
-<https://github.com/Nikhilsinha666/anki-context-search>
+<https://github.com/Nikhilsinha666/Quick-Bubble-Search-Google-YouTube>

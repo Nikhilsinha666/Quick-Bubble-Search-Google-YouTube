@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.3.0 - 2026-08-30
+
+- Renamed to **Quick Bubble Search (Google & YouTube)**. Same add-on, same
+  install code (`458766448`), same settings - only the displayed name, the
+  `Tools` entry, the window title and the right-click submenu change. The
+  package folder stays `context_search`, so nothing has to be reinstalled.
+- A `submenu_label` still holding the old name follows the rename by itself. A
+  label you typed yourself is left alone.
+- The GitHub repo moved to `Quick-Bubble-Search-Google-YouTube`; the homepage and
+  support links point there now. GitHub redirects the old URL.
+- Fixed: clicking empty space on a card selected a nearby word and popped the
+  icons up. A word is now only picked when the pointer is really over it, so
+  blank space does nothing.
+- The icons appear for text you select yourself: double-click a word, or drag
+  over a phrase. A double click that lands beside the text instead of on it no
+  longer selects anything either.
+- `popup_trigger` is replaced by **popup_select_on_click** (default `false`).
+  Tick *Also select the word on a single click* in the settings, or set the key
+  to `true`, for the old single-click behaviour.
+
 ## 1.2.0 - 2026-08-28
 
 - New: a settings window instead of raw JSON. Open it from

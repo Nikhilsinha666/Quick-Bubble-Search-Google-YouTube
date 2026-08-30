@@ -1,10 +1,10 @@
-## Context Search (YouTube & Google Images)
+## Quick Bubble Search (Google & YouTube)
 
-Click or select a word on a card and small search icons appear next to it.
+Double-click a word on a card and small search icons appear next to it.
 The same searches are also in the right-click menu.
 
 **The easy way to change all of this is the settings window:**
-`Tools > Context Search (YouTube & Google Images)...`, or the **Config** button
+`Tools > Quick Bubble Search (Google & YouTube)...`, or the **Config** button
 next to the add-on in `Tools > Add-ons`. It lets you tick searches, reorder
 them, and add any website with its own icon.
 
@@ -15,9 +15,11 @@ This file documents the underlying keys, in case you prefer editing
 
 - **popup_enabled** - `false` turns the floating icons off and leaves only the
   right-click menu.
-- **popup_trigger** - `"click"` shows the icons as soon as you click a word
-  (the word gets selected for you). `"selection"` only shows them when you
-  select text yourself, by double-click or dragging.
+- **popup_select_on_click** - `false` (the default) shows the icons only for
+  text you selected yourself, by double-clicking a word or dragging over a
+  phrase, so a single click never selects anything. `true` also selects the
+  word under a single click, as long as the click lands on the word itself.
+  (This replaces `popup_trigger` from 1.2.0.)
 - **popup_icon_size** - icon button size in pixels (18-64).
 
 The icons appear on the review screen, the previewer and the card layout
@@ -26,7 +28,7 @@ screen. Press `Esc`, scroll, or click elsewhere to dismiss them.
 ### Right-click menu
 
 - **use_submenu** - `true` puts the searches inside a
-  `Context Search (YouTube & Google Images)` submenu, `false` puts them straight
+  `Quick Bubble Search (Google & YouTube)` submenu, `false` puts them straight
   into the right-click menu.
 - **submenu_label** - name of that submenu. It defaults to the add-on's full
   name; shorten it here if you want a smaller right-click menu.
